@@ -1,62 +1,112 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import Form from './Form'
-import axios from "axios"
+import Form from './Form';
+import axios from "axios";
+import * as yup from 'yup';
+import member from './Member';
+import schema from './formSchema';
 
 
 const initialFormValues = {
   
   username: '',
   email: '',
+  password: '',
   role: '',
+  tos: false,
 };
 
+const initialFormErrors = {
+ 
+  username: '',
+  email: '',
+  password: '',
+  role: '',
+}
+
+const initialTeamMembers = []
+const initialDisabled = true;
+
 export default function App() {
-  const[teamMembers, setTeamMembers] = useState([]);
-
+  const[teamMembers, setTeamMembers] = useState(initialTeamMembers);
   const [formValues, setFormValues] = useState(initialFormValues);
-  const [formError, setFormError]=useState("");
+  const [formErrors, setFormErrors]=useState(initialFormErrors);
+  const [disabled, setDisabled] = useState(initialDisabled);
   
   
-  
-  const updateForm = (inputName, inputValue) => {
-    setFormValues({ ...formValues, [inputName]: inputValue });
-  }
+  const getTeamMembers = () => {
 
-  const submitForm = () => {
-
-    const newTeamMember = { 
-      username: formValues.username.trim(),
-      email: formValues.email.trim(),
-      role: formValues.role
-    }
-
-    if (!newTeamMember.username || !newTeamMember.email || !newTeamMember.role) {
-      setFormError("Enter the values ya filthy animal");
-      return;
-    }
-
-    axios.post('fakeapi.com', newTeamMember)
+    axios.get('https://reqres.in/api/users')
       .then(res => {
-        setTeamMembers([res.data, ...teamMembers]);
-        setFormError("");
+        setTeamMembers(res.data);
       }).catch(err => console.error(err))
   }
 
-  useEffect(() => {
-    axios.get('fakeapi.com').then(res => setTeamMembers(res.data))
-  }, [])
-  
-  return (
-    <div className="App">
-      <h1>Team Member Form!</h1>
-      <h3 className="error-text">{formError}</h3>
-      <Form
-              values={formValues}
-              submit={submitForm}
-              update={updateForm}
-              />
-    </div>
-  );
-}
+  const postNewTeamMember = newTeamMember => {
+    axios.post('https://reqres.in/api/users', newTeamMember)
+      .then(res => {
+        setTeamMembers([res.data, ...teamMembers])
+        setFormValues(initialFormValues);
+      }).catch(err => console.error(err))
+  };
 
+  const validate = (name, value) => {
+    yup.reach(schema, name)
+      .validate(value)
+      .then(() => setFormErrors({ ...formErrors, [name]: '' }))
+      .catch(err => setFormErrors({ ...formErrors, [name]: err.errors[0] }))
+  };
+
+  const inputChange = (name, value) => {
+    
+    validate(name, value);
+    setFormValues({
+      ...formValues,
+      [name]: value 
+    })
+  };
+
+
+  const submitForm = () => {
+    const newTeamMember = { 
+      username: formValues.username.trim(),
+      email: formValues.email.trim(),
+      role: formValues.role.trim(),
+      password: formValues.password.trim(),
+    }
+
+    postNewTeamMember(newTeamMember);
+
+  };
+
+  useEffect(() => {
+    getTeamMembers()
+  }, [])
+
+  useEffect(() => {
+    // 🔥 STEP 9- ADJUST THE STATUS OF `disabled` EVERY TIME `formValues` CHANGES
+    schema.isValid(formValues).then(valid => setDisabled(!valid))
+  }, [formValues])
+
+  return (
+    <div className='container'>
+      <header><h1>Team Member App!</h1></header>
+
+      <Form
+        values={formValues}
+        change={inputChange}
+        submit={submitForm}
+        disabled={disabled}
+        errors={formErrors}
+      />
+
+      {
+        teamMembers.map(Member => {
+          return (
+            <Member key={member.id} details={member} />
+          )
+        })
+      }
+    </div>
+  )
+};
