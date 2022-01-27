@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Form from './Form';
 import axios from "axios";
 import * as yup from 'yup';
-import member from './Member';
+import Member from './Member';
 import schema from './formSchema';
 
 
@@ -73,6 +73,7 @@ export default function App() {
       email: formValues.email.trim(),
       role: formValues.role.trim(),
       password: formValues.password.trim(),
+      ToS: formValues.tos.trim(),
     }
 
     postNewTeamMember(newTeamMember);
@@ -84,7 +85,6 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    // 🔥 STEP 9- ADJUST THE STATUS OF `disabled` EVERY TIME `formValues` CHANGES
     schema.isValid(formValues).then(valid => setDisabled(!valid))
   }, [formValues])
 
@@ -101,7 +101,7 @@ export default function App() {
       />
 
       {
-        teamMembers.map(Member => {
+        teamMembers.map(member => {
           return (
             <Member key={member.id} details={member} />
           )

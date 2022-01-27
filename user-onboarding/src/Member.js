@@ -2,7 +2,7 @@ import React from 'react'
 
 function Member({ details }) {
   if (!details) {
-    return <h3>Working fetching your Member details...</h3>
+    return <h3>Working fetching your Member&apo;s details...</h3>
   }
 
   return (
