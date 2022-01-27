@@ -22,7 +22,7 @@ const initialFormErrors = {
   email: '',
   password: '',
   role: '',
-}
+};
 
 const initialTeamMembers = []
 const initialDisabled = true;
@@ -40,7 +40,7 @@ export default function App() {
       .then(res => {
         setTeamMembers(res.data);
       }).catch(err => console.error(err))
-  }
+  };
 
   const postNewTeamMember = newTeamMember => {
     axios.post('https://reqres.in/api/users', newTeamMember)
@@ -63,7 +63,7 @@ export default function App() {
     setFormValues({
       ...formValues,
       [name]: value 
-    })
+    });
   };
 
 
@@ -74,7 +74,7 @@ export default function App() {
       role: formValues.role.trim(),
       password: formValues.password.trim(),
       ToS: formValues.tos.trim(),
-    }
+    };
 
     postNewTeamMember(newTeamMember);
 
@@ -82,14 +82,14 @@ export default function App() {
 
   useEffect(() => {
     getTeamMembers()
-  }, [])
+  }, []);
 
   useEffect(() => {
     schema.isValid(formValues).then(valid => setDisabled(!valid))
   }, [formValues])
 
   return (
-    <div className='container'>
+    <div className='Member-container'>
       <header><h1>Team Member App!</h1></header>
 
       <Form
@@ -106,7 +106,7 @@ export default function App() {
             <Member key={member.id} details={member} />
           )
         })
-      }
+      };
     </div>
   )
 };
